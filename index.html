@@ -1,0 +1,257 @@
+<!doctype html>
+<html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>МЕДИКА — цифровой тренажёр</title>
+<style>
+:root{--g:#078b61;--g2:#e1f7ef;--ink:#123d32;--muted:#6b817b;--bg:#f3faf7}
+*{box-sizing:border-box}body{margin:0;background:linear-gradient(135deg,#edf9f5,#fff);font-family:Arial,sans-serif;color:var(--ink)}
+.app{max-width:470px;margin:auto;min-height:100vh;background:#fff;box-shadow:0 0 35px #bdd8ce;padding-bottom:32px}
+header{background:linear-gradient(135deg,#056f50,#14b77d);color:#fff;padding:16px 18px 18px;border-radius:0 0 28px 28px}
+.logoImg{width:100%;max-width:360px;height:118px;object-fit:contain;object-position:center;background:#fff;border-radius:18px;display:block;margin:auto}.tag{font-size:12px;margin-top:10px;text-align:center;opacity:.96}
+main{padding:18px}.screen{display:none}.screen.active{display:block}h1{font-size:23px;margin:8px 0 16px}.sub{color:var(--muted);font-size:14px}.card{background:#fff;border:1px solid #e3eee9;border-radius:18px;padding:15px;margin:10px 0;box-shadow:0 5px 16px #dcebe6}.btn{border:0;background:var(--g);color:#fff;border-radius:14px;padding:13px 16px;font-weight:700;width:100%;font-size:15px;margin-top:10px;cursor:pointer}.btn.light{background:var(--g2);color:var(--g)}.back{background:none;border:0;color:var(--g);font-size:15px;padding:0 0 8px;cursor:pointer}.skill{display:flex;gap:12px;align-items:center}.icon{width:52px;height:52px;min-width:52px;border-radius:16px;background:var(--g2);display:grid;place-items:center;font-size:27px}.skill b{font-size:14px}.pill{display:inline-block;background:var(--g2);color:var(--g);padding:5px 9px;border-radius:20px;font-size:12px;font-weight:700}.hero{background:linear-gradient(135deg,#e8faf3,#fff);border-radius:20px;padding:16px;margin-bottom:14px}.illus{width:100%;height:190px;border-radius:16px;object-fit:cover;background:#dff7ed}.option{padding:13px;border:1px solid #dbe9e4;border-radius:13px;margin:8px 0;cursor:pointer}.option.sel{border:2px solid var(--g);background:var(--g2)}.progress{height:9px;background:#e5eee9;border-radius:9px;overflow:hidden}.progress>i{display:block;height:100%;background:var(--g)}.stat{font-size:32px;font-weight:900;color:var(--g)}.small{font-size:12px;color:var(--muted)}footer{text-align:center;color:#7b918a;font-size:11px;padding:18px}.search{width:100%;padding:12px;border:1px solid #dbe9e4;border-radius:13px;font-size:14px;margin-bottom:10px}.source{font-size:11px;color:#6b817b;line-height:1.4}.logoMini{width:64px;height:64px;object-fit:contain;float:right;margin-top:-8px}.checkrow{display:flex;gap:10px;align-items:flex-start}.checkrow input{margin-top:3px;transform:scale(1.2)}
+</style></head><body><div class="app">
+<header><img class="logoImg" src="assets/images/medika_logo.png" alt="МЕДИКА"><div class="tag">Цифровой тренажёр практических медицинских навыков</div></header>
+<main>
+<section id="home" class="screen active"><h1>Добро пожаловать!</h1><div class="hero"><img class="logoMini" src="assets/images/medika_logo.png" alt=""><h2>Знания сегодня — уверенность завтра!</h2><p class="sub">Теория • тесты • 3D-иллюстрации • интерактивные учебные чек-листы</p><button class="btn" onclick="show('spec')">Начать обучение</button></div><div class="card"><b>Практические навыки ФМЗА</b><p class="small">Специальность → навык → теория → квиз → учебный чек-лист</p></div><div class="card"><b>Важно</b><p class="small">Названия навыков сверены с опубликованными материалами ФМЗА. Для актуальной версии всегда доступна ссылка на официальный сайт.</p></div></section>
+<section id="spec" class="screen"><button class="back" onclick="show('home')">← Главная</button><h1>Выберите специальность</h1><div id="fmzaStatus" class="card"></div><p class="sub">Учебная база МЕДИКА: 2024. Официальные перечни ФМЗА 2026 доступны для сверки.</p><div id="specList"></div></section>
+<section id="skills" class="screen"><button class="back" onclick="show('spec')">← Специальности</button><h1 id="specTitle"></h1><p id="specSub" class="sub"></p><input id="search" class="search" placeholder="Поиск навыка…" oninput="renderSkills()"><div id="skillList"></div><button class="btn light" onclick="openCurrentFMZA()">🌐 Открыть официальный ФМЗА</button></section>
+<section id="skill" class="screen"><button class="back" onclick="show('skills')">← Навыки</button><div class="hero"><span id="skillSpec" class="pill"></span><h1 id="skillTitle"></h1><div id="skillImage"></div><p id="skillSource" class="source"></p></div><div class="card"><b>📖 Теория</b><p class="small">Учебный раздел навыка.</p><button class="btn light" onclick="openTheory()">Открыть теорию</button></div><div class="card"><b>🧠 Тестовый квиз</b><p class="small">Проверка знаний по выбранному навыку.</p><button class="btn" onclick="startQuiz()">Начать квиз</button></div><div class="card"><b>🩺 Учебный чек-лист</b><p class="small">Пошаговая тренировка практического навыка.</p><button class="btn light" onclick="startChecklist()">Начать тренировку</button></div><button class="btn light" onclick="openCurrentFMZA()">🌐 Материалы ФМЗА</button></section>
+<section id="quiz" class="screen"><button class="back" onclick="show('skill')">← Навык</button><h1>Тестовый квиз</h1><div class="progress"><i id="qbar"></i></div><p id="qnum" class="small"></p><div class="card"><b id="qtext"></b></div><div id="opts"></div><div id="feedback"></div><button id="next" class="btn" disabled onclick="nextQ()">Следующий вопрос</button></section>
+<section id="result" class="screen"><h1>Результат</h1><div class="hero"><div id="score" class="stat">0%</div><p id="scoreText" class="sub"></p></div><button class="btn" onclick="show('skill')">Вернуться к навыку</button><button class="btn light" onclick="show('spec')">Выбрать другую специальность</button></section>
+<section id="check" class="screen"><button class="back" onclick="show('skill')">← Навык</button><h1>Учебный чек-лист</h1><p class="sub">Отмечайте выполненные этапы.</p><div id="checks"></div><button class="btn" onclick="finishCheck()">Завершить тренировку</button></section>
+<section id="theory" class="screen">
+<button class="back" onclick="show('skill')">← Навык</button>
+<h1>Теория</h1>
+<div class="hero">
+  <h2 id="theoryTitle"></h2>
+  <p class="sub">Учебная теория по выбранному практическому навыку.</p>
+</div>
+<div id="theoryContent"></div>
+<div class="card">
+  <b>⚠️ Важно</b>
+  <p class="small">Материал «МЕДИКА» предназначен для обучения и тренировки. Для первичной аккредитации необходимо сверять порядок действий с актуальными документами ФМЗА и локальными нормативными документами медицинской организации.</p>
+</div>
+<button class="btn" onclick="openCurrentFMZA()">🌐 Открыть официальный материал ФМЗА</button>
+</section>
+
+<div class="card" style="text-align:center;margin:18px 0;border:1px solid #dcebe4">
+  <h3 style="margin-bottom:6px">📱 «МЕДИКА» всегда под рукой</h3>
+  <p class="small">Отсканируйте QR-код, чтобы открыть цифровой тренажёр на телефоне.</p>
+  <img src="assets/images/medika_qr.png" alt="QR-код МЕДИКА" style="width:190px;max-width:70%;margin:8px auto 12px;border-radius:12px">
+  <div>
+    <a class="btn" href="assets/images/medika_qr.png" download="MEDIKA_QR.png" style="display:inline-block;text-decoration:none">⬇️ Скачать QR-код</a><button class="btn secondary" onclick="shareMedika()" style="margin-left:8px">📤 Поделиться МЕДИКА</button>
+  </div>
+  <p class="small" style="margin-top:10px">QR-код ведёт на GitHub Pages «МЕДИКА».</p>
+</div>
+</main><footer>МЕДИКА • учебный цифровой тренажёр<br>ФМЗА — официальный источник перечней практических навыков</footer></div>
+<script>
+const fmzaChecked="16.09.2026";const fmzaOfficialYear="2026";const fmzaTrainingYear="2024";const fmzaUrls={"31.02.01":"https://fmza.ru/srednee-professionalnoe-obrazovanie/spetsialnosti-spo/lechebnoe-delo/perechen-prakticheskikh-navykov-umeniy/","31.02.02":"https://fmza.ru/srednee-professionalnoe-obrazovanie/spetsialnosti-spo/akusherskoe-delo/prakticheskie-navyki/","34.02.01":"https://fmza.ru/srednee-professionalnoe-obrazovanie/spetsialnosti-spo/sestrinskoe-delo/perechen-prakticheskikh-navykov-umeniy/","32.02.01":"https://fmza.ru/srednee-professionalnoe-obrazovanie/spetsialnosti-spo/mediko-profilakticheskoe-delo/perechen-prakticheskikh-navykov-umeniy/"};
+const registry=[{"specialty": "Лечебное дело", "code": "31.02.01", "number": 1, "skill": "Измерение артериального давления механическим тонометром", "status": "training_ready"}, {"specialty": "Лечебное дело", "code": "31.02.01", "number": 2, "skill": "Ингаляция с использованием компрессорного небулайзера", "status": "training_ready"}, {"specialty": "Лечебное дело", "code": "31.02.01", "number": 3, "skill": "Определение менингеальных симптомов", "status": "training_ready"}, {"specialty": "Лечебное дело", "code": "31.02.01", "number": 4, "skill": "Аускультация лёгких", "status": "training_ready"}, {"specialty": "Лечебное дело", "code": "31.02.01", "number": 5, "skill": "Сравнительная перкуссия лёгких", "status": "training_ready"}, {"specialty": "Лечебное дело", "code": "31.02.01", "number": 6, "skill": "Аускультация сердца", "status": "training_ready"}, {"specialty": "Лечебное дело", "code": "31.02.01", "number": 7, "skill": "Определение относительных границ сердца", "status": "training_ready"}, {"specialty": "Лечебное дело", "code": "31.02.01", "number": 8, "skill": "Электрокардиография", "status": "training_ready"}, {"specialty": "Лечебное дело", "code": "31.02.01", "number": 9, "skill": "Пальпация затылочных, околоушных и подчелюстных лимфатических узлов", "status": "training_ready"}, {"specialty": "Лечебное дело", "code": "31.02.01", "number": 10, "skill": "Транспортная иммобилизация при переломе предплечья", "status": "training_ready"}, {"specialty": "Лечебное дело", "code": "31.02.01", "number": 11, "skill": "Базовая сердечно-лёгочная реанимация взрослому человеку", "status": "training_ready"}, {"specialty": "Акушерское дело", "code": "31.02.02", "number": 1, "skill": "Осмотр шейки матки в зеркалах у беременной женщины", "status": "training_ready"}, {"specialty": "Акушерское дело", "code": "31.02.02", "number": 2, "skill": "Бимануальное влагалищное исследование у беременной женщины", "status": "training_ready"}, {"specialty": "Акушерское дело", "code": "31.02.02", "number": 3, "skill": "Взятие мазка по Папаниколау (Pap-тест)", "status": "training_ready"}, {"specialty": "Акушерское дело", "code": "31.02.02", "number": 4, "skill": "Пальпация плода — наружное акушерское исследование", "status": "training_ready"}, {"specialty": "Акушерское дело", "code": "31.02.02", "number": 5, "skill": "Аускультация плода акушерским стетоскопом", "status": "training_ready"}, {"specialty": "Акушерское дело", "code": "31.02.02", "number": 6, "skill": "Влагалищное исследование в родах", "status": "training_ready"}, {"specialty": "Акушерское дело", "code": "31.02.02", "number": 7, "skill": "Оказание акушерского пособия в родах", "status": "training_ready"}, {"specialty": "Акушерское дело", "code": "31.02.02", "number": 8, "skill": "Антропометрия новорождённого", "status": "training_ready"}, {"specialty": "Акушерское дело", "code": "31.02.02", "number": 9, "skill": "Определение признака Вастена", "status": "training_ready"}, {"specialty": "Акушерское дело", "code": "31.02.02", "number": 10, "skill": "Наружные методы выделения отделившегося последа", "status": "training_ready"}, {"specialty": "Акушерское дело", "code": "31.02.02", "number": 11, "skill": "Базовая сердечно-лёгочная реанимация взрослому человеку", "status": "training_ready"}, {"specialty": "Сестринское дело", "code": "34.02.01", "number": 1, "skill": "Взятие крови из периферической вены с помощью вакуумной системы", "status": "training_ready"}, {"specialty": "Сестринское дело", "code": "34.02.01", "number": 2, "skill": "Внутримышечное введение лекарственного препарата", "status": "training_ready"}, {"specialty": "Сестринское дело", "code": "34.02.01", "number": 3, "skill": "Внутривенное введение лекарственного препарата", "status": "training_ready"}, {"specialty": "Сестринское дело", "code": "34.02.01", "number": 4, "skill": "Постановка очистительной клизмы", "status": "training_ready"}, {"specialty": "Сестринское дело", "code": "34.02.01", "number": 5, "skill": "Постановка газоотводной трубки", "status": "training_ready"}, {"specialty": "Сестринское дело", "code": "34.02.01", "number": 6, "skill": "Уход за постоянным мочевым катетером Фолея у мужчины", "status": "training_ready"}, {"specialty": "Сестринское дело", "code": "34.02.01", "number": 7, "skill": "Уход за назогастральным зондом", "status": "training_ready"}, {"specialty": "Сестринское дело", "code": "34.02.01", "number": 8, "skill": "Применение пузыря со льдом", "status": "training_ready"}, {"specialty": "Сестринское дело", "code": "34.02.01", "number": 9, "skill": "Измерение артериального давления механическим тонометром", "status": "training_ready"}, {"specialty": "Сестринское дело", "code": "34.02.01", "number": 10, "skill": "Гигиеническая обработка рук кожным антисептиком", "status": "training_ready"}, {"specialty": "Сестринское дело", "code": "34.02.01", "number": 11, "skill": "Базовая сердечно-лёгочная реанимация взрослому человеку", "status": "training_ready"}, {"specialty": "Медико-профилактическое дело", "code": "32.02.01", "number": 1, "skill": "Измерение уровня искусственной освещённости", "status": "training_ready"}, {"specialty": "Медико-профилактическое дело", "code": "32.02.01", "number": 2, "skill": "Измерение естественной освещённости", "status": "training_ready"}, {"specialty": "Медико-профилактическое дело", "code": "32.02.01", "number": 3, "skill": "Измерение температуры воздуха", "status": "training_ready"}, {"specialty": "Медико-профилактическое дело", "code": "32.02.01", "number": 4, "skill": "Измерение относительной влажности воздуха", "status": "training_ready"}, {"specialty": "Медико-профилактическое дело", "code": "32.02.01", "number": 5, "skill": "Измерение уровня непостоянного шума", "status": "training_ready"}, {"specialty": "Медико-профилактическое дело", "code": "32.02.01", "number": 6, "skill": "Измерение температуры горячей воды", "status": "training_ready"}, {"specialty": "Медико-профилактическое дело", "code": "32.02.01", "number": 7, "skill": "Отбор проб питьевой воды для микробиологического исследования", "status": "training_ready"}, {"specialty": "Медико-профилактическое дело", "code": "32.02.01", "number": 8, "skill": "Отбор проб питьевой воды для санитарно-химического исследования", "status": "training_ready"}, {"specialty": "Медико-профилактическое дело", "code": "32.02.01", "number": 9, "skill": "Отбор проб песка для гельминтологического исследования", "status": "training_ready"}, {"specialty": "Медико-профилактическое дело", "code": "32.02.01", "number": 10, "skill": "Отбор проб готовых блюд для микробиологического исследования", "status": "training_ready"}, {"specialty": "Медико-профилактическое дело", "code": "32.02.01", "number": 11, "skill": "Отбор проб почвы для гельминтологического исследования", "status": "training_ready"}, {"specialty": "Медико-профилактическое дело", "code": "32.02.01", "number": 12, "skill": "Отбор проб методом смывов со стерильных инструментов", "status": "training_ready"}, {"specialty": "Медико-профилактическое дело", "code": "32.02.01", "number": 13, "skill": "Отбор проб поверхностей для обнаружения бактерий группы кишечной палочки", "status": "training_ready"}, {"specialty": "Медико-профилактическое дело", "code": "32.02.01", "number": 14, "skill": "Отбор проб предметов обихода для выявления возбудителей паразитарных болезней", "status": "training_ready"}, {"specialty": "Медико-профилактическое дело", "code": "32.02.01", "number": 15, "skill": "Дезинфекция, совмещённая с предстерилизационной очисткой", "status": "training_ready"}, {"specialty": "Медико-профилактическое дело", "code": "32.02.01", "number": 16, "skill": "Контроль качества заключительной дезинфекции при дифтерии", "status": "training_ready"}, {"specialty": "Медико-профилактическое дело", "code": "32.02.01", "number": 17, "skill": "Контроль качества заключительной дезинфекции при микроспории", "status": "training_ready"}, {"specialty": "Медико-профилактическое дело", "code": "32.02.01", "number": 18, "skill": "Контроль качества заключительной дезинфекции при кишечной инфекции", "status": "training_ready"}, {"specialty": "Медико-профилактическое дело", "code": "32.02.01", "number": 19, "skill": "Контроль качества заключительной дезинфекции методом смывов после генеральной уборки", "status": "training_ready"}, {"specialty": "Медико-профилактическое дело", "code": "32.02.01", "number": 20, "skill": "Контроль качества заключительной дезинфекции в организациях воспитания и обучения, отдыха и оздоровления детей и молодежи по случаю заболевания кишечной инфекцией среди детей", "status": "training_ready"}, {"specialty": "Медико-профилактическое дело", "code": "32.02.01", "number": 21, "skill": "Базовая сердечно-лёгочная реанимация взрослому человеку", "status": "training_ready"}];
+const specialties=[{"code": "31.02.01", "name": "Лечебное дело", "icon": "🩺", "count": 11, "url": "https://fmza.ru/srednee-professionalnoe-obrazovanie/spetsialnosti-spo/lechebnoe-delo/perechen-prakticheskikh-navykov-umeniy/"}, {"code": "31.02.02", "name": "Акушерское дело", "icon": "👶", "count": 11, "url": "https://fmza.ru/srednee-professionalnoe-obrazovanie/spetsialnosti-spo/akusherskoe-delo/prakticheskie-navyki/"}, {"code": "34.02.01", "name": "Сестринское дело", "icon": "💉", "count": 11, "url": "https://fmza.ru/srednee-professionalnoe-obrazovanie/spetsialnosti-spo/sestrinskoe-delo/perechen-prakticheskikh-navykov-umeniy/"}, {"code": "32.02.01", "name": "Медико-профилактическое дело", "icon": "🧪", "count": 21, "url": "https://fmza.ru/srednee-professionalnoe-obrazovanie/spetsialnosti-spo/mediko-profilakticheskoe-delo/perechen-prakticheskikh-navykov-umeniy/"}];
+let currentSpec=specialties[0], currentSkill=null, cur=0, score=0, answered=false;
+const qs=[['Что необходимо сделать до начала практической процедуры?',['Сразу начать манипуляцию','Представиться, объяснить процедуру и получить согласие','Не разговаривать с пациентом','Передать оборудование пациенту'],1],['Что важно сделать после выполнения процедуры?',['Оставить оборудование на месте','Оценить состояние пациента и оформить результат','Сразу уйти','Не фиксировать результат'],1],['Какой источник следует использовать для проверки актуального перечня навыков?',['Случайный сайт','Официальный сайт ФМЗА','Социальные сети','Рекламный каталог'],1]];
+function show(id){document.querySelectorAll('.screen').forEach(x=>x.classList.remove('active'));const el=document.getElementById(id);if(el)el.classList.add('active');window.scrollTo(0,0)}
+function init(){document.getElementById('fmzaStatus').innerHTML='<b>🔄 Актуальность ФМЗА</b><p class="small">Проверка: '+fmzaChecked+' • официальная версия: '+fmzaOfficialYear+' • учебная база: '+fmzaTrainingYear+'</p><p class="small">ФМЗА публикует отдельные перечни на 2026 год. Старую учебную версию МЕДИКА не заменяет автоматически.</p><button class="btn light" onclick="checkFMZA()">🌐 Проверить обновление на ФМЗА</button>';document.getElementById('specList').innerHTML=specialties.map((s,i)=>`<div class="card" onclick="selectSpec(${i})"><div class="skill"><div class="icon">${s.icon}</div><div><b>${s.name}</b><p class="small">${s.code} • ${s.count} навыков • база 2024</p></div><span>→</span></div></div>`).join('')}
+function selectSpec(i){currentSpec=specialties[i];document.getElementById('specTitle').textContent=currentSpec.name;document.getElementById('specSub').textContent=currentSpec.code+' • '+currentSpec.count+' практических навыков';document.getElementById('search').value='';renderSkills();show('skills')}
+function currentSkills(){return registry.filter(x=>x.code===currentSpec.code)}
+function renderSkills(){const q=(document.getElementById('search').value||'').toLowerCase();const data=currentSkills().filter(x=>x.skill.toLowerCase().includes(q));document.getElementById('skillList').innerHTML=data.map((x)=>`<div class="card skill" onclick="openSkill('${x.code}',${x.number})"><div class="icon">${iconFor(x.skill)}</div><div><b>${x.number}. ${x.skill}</b><p class="small">Теория • Квиз • Учебный чек-лист</p></div><span>→</span></div>`).join('')||'<div class="card">Навык не найден.</div>'}
+function iconFor(t){if(/реанимац/i.test(t))return'🫀';if(/электрокардиограф/i.test(t))return'📈';if(/аускультац/i.test(t))return'🩺';if(/ингаляц/i.test(t))return'💨';if(/перкусс/i.test(t))return'🫁';if(/давлен/i.test(t))return'🩺';if(/перелом|иммобилизац/i.test(t))return'🦴';if(/плод|родах|акуш/i.test(t))return'👶';if(/кров|введен|инъек/i.test(t))return'💉';return'⚕️'}
+function openSkill(code,num){currentSpec=specialties.find(s=>s.code===code)||currentSpec;currentSkill=registry.find(x=>x.code===code&&x.number===num);document.getElementById('skillSpec').textContent=currentSpec.name;document.getElementById('skillTitle').textContent=currentSkill.skill;const idx=String(currentSkill.number).padStart(2,'0');document.getElementById('skillImage').innerHTML=`<img class="illus" src="assets/images/skills_3d/${idx}_skill.jpg" alt="Иллюстрация навыка" onerror="this.style.display='none'">`;document.getElementById('skillSource').textContent='Учебная иллюстрация • перечень навыков ФМЗА';show('skill')}
+function openTheory(){renderTheory();show('theory')}
+
+const theoryData = {
+"31.02.01": {
+1:{purpose:"Неинвазивная оценка уровня артериального давления и контроль гемодинамического состояния пациента.",
+equipment:"Механический тонометр, фонендоскоп, средство для обработки рук, документация.",
+preparation:"Усадить или уложить пациента, обеспечить покой; рука должна быть расслаблена и поддерживаться на уровне сердца. Подобрать манжету по размеру.",
+algorithm:["Обработать руки и представиться.","Объяснить процедуру и получить согласие.","Обеспечить спокойное положение пациента.","Наложить манжету правильно и плотно, без перекручивания.","Расположить фонендоскоп над плечевой артерией.","Плавно нагнетать и выпускать воздух, ориентируясь на звуки Короткова.","Зафиксировать систолическое и диастолическое давление.","Сравнить результат с клинической ситуацией и предыдущими измерениями.","Сообщить результат пациенту.","Документировать показатели."],
+findings:"Результат оценивают с учётом возраста, состояния пациента, условий измерения и динамики. Однократное значение не следует интерпретировать изолированно.",
+errors:"Неподходящая манжета, измерение сразу после нагрузки, разговор во время процедуры, рука без опоры, слишком быстрое выпускание воздуха.",
+vocab:"blood pressure — артериальное давление; cuff — манжета; stethoscope — стетоскоп; systolic pressure — систолическое давление; diastolic pressure — диастолическое давление"},
+2:{purpose:"Доставка лекарственного раствора или увлажнённого аэрозоля в дыхательные пути с помощью компрессорного небулайзера по назначению.",
+equipment:"Компрессорный небулайзер, камера-небулайзер, маска или мундштук, назначенный раствор, расходные материалы.",
+preparation:"Проверить назначение, препарат и срок годности; объяснить пациенту спокойное дыхание во время ингаляции.",
+algorithm:["Обработать руки.","Проверить назначение и подготовить препарат.","Собрать небулайзер согласно инструкции производителя.","Усадить пациента в удобное положение.","Подключить маску или мундштук.","Включить устройство и проводить ингаляцию по назначенному режиму.","Наблюдать за состоянием пациента.","После завершения выключить устройство и разобрать его.","Обработать детали в соответствии с инструкцией.","Зафиксировать проведение процедуры."],
+findings:"Оценивают переносимость процедуры, характер дыхания и появление нежелательных реакций.",
+errors:"Неверный препарат или дозировка, нарушение техники сборки, использование не предназначенных для небулайзера растворов, отсутствие наблюдения за пациентом.",
+vocab:"nebulizer — небулайзер; inhalation — ингаляция; mouthpiece — мундштук; mask — маска; solution — раствор"},
+3:{purpose:"Выявление признаков раздражения мозговых оболочек при клиническом обследовании.",
+equipment:"Перчатки при необходимости, кушетка, спокойная обстановка, документация.",
+preparation:"Объяснить пациенту цель исследования и обеспечить положение, позволяющее безопасно выполнить физикальное обследование.",
+algorithm:["Представиться и объяснить процедуру.","Оценить общее состояние пациента.","Провести исследование мягко, без резких движений.","Оценить наличие соответствующих менингеальных признаков по принятой методике.","Сопоставить результаты с жалобами и другими симптомами.","При выявлении настораживающих признаков сообщить врачу/старшему медицинскому работнику.","Документировать результат."],
+findings:"Положительные менингеальные симптомы сами по себе не являются окончательным диагнозом и требуют клинической оценки.",
+errors:"Грубое выполнение манипуляции, попытка поставить диагноз только по одному признаку, отсутствие оценки общего состояния.",
+vocab:"meningeal signs — менингеальные симптомы; neck stiffness — ригидность затылочных мышц; examination — обследование"},
+4:{purpose:"Оценка характера дыхательных шумов и выявление патологических изменений в лёгких.",
+equipment:"Фонендоскоп/стетоскоп, кушетка, документация.",
+preparation:"Пациент должен быть удобно размещён; грудная клетка доступна для исследования. Объяснить необходимость спокойного дыхания.",
+algorithm:["Обработать руки и объяснить процедуру.","Попросить пациента дышать спокойно через рот.","Последовательно выслушать симметричные участки грудной клетки.","Сравнивать правую и левую стороны.","Оценить основной дыхательный шум и дополнительные шумы.","При необходимости попросить пациента глубже вдохнуть или покашлять.","Документировать характер выслушанных шумов."],
+findings:"Оценивают везикулярное дыхание, его ослабление/усиление и наличие дополнительных шумов: хрипов, крепитации и др.",
+errors:"Выслушивание только одной зоны, отсутствие сравнения сторон, шумная обстановка, неправильное положение мембраны фонендоскопа.",
+vocab:"lung auscultation — аускультация лёгких; breath sounds — дыхательные шумы; wheeze — хрип; crackles — крепитация"},
+5:{purpose:"Сравнительная оценка звука при перкуссии симметричных участков лёгких.",
+equipment:"Кушетка/стул, спокойная обстановка, документация.",
+preparation:"Обеспечить доступ к симметричным участкам грудной клетки и объяснить пациенту порядок исследования.",
+algorithm:["Объяснить процедуру.","Разместить пациента удобно.","Проводить перкуссию по симметричным участкам грудной клетки.","Сравнивать звук справа и слева на одном уровне.","Оценивать характер и изменения перкуторного звука.","Сопоставить данные с результатами аускультации и жалобами.","Документировать результат."],
+findings:"В норме над воздушной лёгочной тканью определяется ясный лёгочный звук; изменение характера звука требует клинической интерпретации.",
+errors:"Несимметричное сравнение зон, чрезмерная сила удара, исследование поверх одежды.",
+vocab:"percussion — перкуссия; resonant sound — ясный лёгочный звук; chest — грудная клетка"},
+6:{purpose:"Оценка частоты, ритма и характера сердечных тонов и шумов.",
+equipment:"Стетоскоп/фонендоскоп, кушетка, документация.",
+preparation:"Обеспечить покой пациента и удобное положение. По показаниям исследование проводят в нескольких положениях.",
+algorithm:["Объяснить процедуру.","Оценить пульс и общее состояние.","Последовательно выслушать основные точки аускультации сердца.","Оценить частоту и ритм.","Определить звучность тонов.","При наличии шума оценить его характеристики и фазу сердечного цикла.","Сопоставить данные с жалобами и другими признаками.","Документировать результат."],
+findings:"Оценивают ритм, частоту, звучность I и II тонов и наличие дополнительных шумов.",
+errors:"Выслушивание только одной точки, отсутствие оценки ритма, разговор пациента во время исследования.",
+vocab:"heart auscultation — аускультация сердца; heart sounds — тоны сердца; murmur — шум; rhythm — ритм"},
+7:{purpose:"Ориентировочная оценка положения и размеров сердца методом перкуссии.",
+equipment:"Кушетка/стул, спокойная обстановка, документация.",
+preparation:"Пациент располагается в положении, предусмотренном методикой; грудная клетка должна быть доступна.",
+algorithm:["Объяснить исследование.","Определить ориентиры перкуторно по принятой методике.","Последовательно оценить правую, левую и верхнюю границы относительной сердечной тупости.","Сопоставить данные с телосложением и клинической картиной.","Зафиксировать результат."],
+findings:"Изменение границ может иметь разные причины и требует сопоставления с другими данными обследования.",
+errors:"Неверное направление перкуссии, отсутствие анатомических ориентиров, самостоятельная трактовка без клинического контекста.",
+vocab:"heart borders — границы сердца; cardiac dullness — сердечная тупость; percussion — перкуссия"},
+8:{purpose:"Регистрация электрической активности сердца для последующей оценки ЭКГ медицинским специалистом.",
+equipment:"Электрокардиограф, электроды, расходные материалы, средство для обработки кожи при необходимости.",
+preparation:"Проверить аппарат, обеспечить покой пациента и правильное положение тела; объяснить, что процедура безболезненна.",
+algorithm:["Проверить аппарат и расходные материалы.","Обработать руки.","Объяснить процедуру и получить согласие.","Разместить пациента в покое.","Подготовить места наложения электродов.","Наложить электроды согласно схеме используемого аппарата.","Попросить пациента не разговаривать и спокойно лежать.","Записать ЭКГ.","Проверить качество записи и наличие артефактов.","Сохранить/передать запись и оформить результат."],
+findings:"ЭКГ оценивается по частоте и ритму, зубцам и интервалам, сегментам и другим признакам. Диагностическое заключение выполняется компетентным специалистом.",
+errors:"Неправильное расположение электродов, плохой контакт, движение и разговор пациента, электрические помехи.",
+vocab:"electrocardiography — электрокардиография; electrode — электрод; ECG/EKG — ЭКГ; tracing — запись"},
+9:{purpose:"Оценка размеров, болезненности и характера лимфатических узлов при физикальном обследовании.",
+equipment:"Перчатки при необходимости, документация.",
+preparation:"Объяснить процедуру; обеспечить удобное положение головы и шеи.",
+algorithm:["Объяснить исследование.","Осмотреть область.","Пальпировать затылочные, околоушные и подчелюстные группы.","Сравнивать симметричные стороны.","Оценить размер, консистенцию, подвижность и болезненность.","Сопоставить данные с жалобами и другими признаками.","Документировать результат."],
+findings:"Оценивают наличие увеличения, болезненности, изменения консистенции и подвижности узлов.",
+errors:"Сильное давление, пропуск групп узлов, отсутствие сравнения сторон.",
+vocab:"lymph node — лимфатический узел; palpation — пальпация; tenderness — болезненность; swelling — увеличение"},
+10:{purpose:"Временная стабилизация повреждённой конечности при переломе предплечья до дальнейшей медицинской помощи и транспортировки.",
+equipment:"Иммобилизационная шина/подручное средство согласно оснащению, бинт/фиксаторы, мягкая прокладка.",
+preparation:"Оценить состояние пациента и конечности, проверить кровообращение, чувствительность и движение дистальнее повреждения, не выполняя грубых движений.",
+algorithm:["Объяснить действия и обеспечить безопасность.","Оценить кровотечение и общее состояние.","До и после фиксации контролировать пульс, чувствительность и цвет/температуру кисти.","Подготовить шину и мягкую прокладку.","Зафиксировать конечность в щадящем положении по принятой методике.","Не пытаться самостоятельно вправлять отломки.","Проверить, что фиксация не нарушает кровообращение.","Организовать безопасную транспортировку.","Документировать выполненную помощь."],
+findings:"После фиксации дистальные отделы конечности должны сохранять приемлемое кровообращение и чувствительность.",
+errors:"Попытка вправления, слишком тугая фиксация, отсутствие контроля кровообращения до и после.",
+vocab:"fracture — перелом; splint — шина; immobilization — иммобилизация; forearm — предплечье"},
+11:{purpose:"Базовая сердечно-лёгочная реанимация взрослому человеку при отсутствии нормального дыхания и признаках остановки кровообращения.",
+equipment:"Средства индивидуальной защиты, AED/дефибриллятор при наличии, средства для защиты дыхания по оснащению.",
+preparation:"Алгоритм выполняется в экстренной ситуации по действующим протоколам и с учётом обучения конкретной организации.",
+algorithm:["Обеспечить безопасность места.","Оценить реакцию пострадавшего.","Позвать на помощь и организовать вызов экстренной помощи/AED.","Оценить нормальное дыхание согласно действующему алгоритму.","При отсутствии нормального дыхания начать СЛР.","Выполнять компрессии грудной клетки с правильной техникой и минимальными паузами.","При наличии AED подключить его и следовать голосовым/визуальным подсказкам.","Продолжать реанимационные действия до появления признаков жизни, прибытия помощи или невозможности продолжения."],
+findings:"Эффективность оценивают по соблюдению алгоритма и появлению признаков восстановления кровообращения; порядок действий должен соответствовать актуальному протоколу.",
+errors:"Длительные паузы, неправильная глубина/частота компрессий, отсутствие вызова помощи/AED, небезопасное место.",
+vocab:"CPR — сердечно-лёгочная реанимация; chest compression — компрессия грудной клетки; AED — автоматический наружный дефибриллятор; rescue breathing — искусственное дыхание"}
+}
+};
+
+function genericTheory(skill){
+  return {
+    purpose:"Практический навык направлен на безопасное обследование пациента, выполнение процедуры по установленному алгоритму и документирование результата.",
+    equipment:"Оборудование и расходные материалы определяются конкретной процедурой, назначением и оснащением симуляционного кабинета.",
+    preparation:"Проверить назначение/задачу, идентифицировать пациента, объяснить цель процедуры, получить согласие, подготовить оборудование и обеспечить инфекционную безопасность.",
+    algorithm:["Обеспечить безопасность пациента и специалиста.","Представиться и идентифицировать пациента.","Объяснить цель и ход процедуры.","Обработать руки и использовать необходимые средства защиты.","Подготовить оборудование.","Выполнить навык по утверждённому алгоритму.","Наблюдать за состоянием пациента.","Оценить результат.","Утилизировать/обработать материалы и оборудование по правилам.","Оформить результат в документации."],
+    findings:"Результат оценивают по цели конкретной процедуры и клинической ситуации.",
+    errors:"Нарушение идентификации пациента, инфекционной безопасности, последовательности действий или документирования.",
+    vocab:`skill — навык; procedure — процедура; patient — пациент; assessment — оценка; safety — безопасность`
+  };
+}
+
+function theoryCard(title, body){
+  return `<div class="card"><b>${title}</b><div class="small" style="line-height:1.6">${body}</div></div>`;
+}
+
+
+const vocabularyData={
+1:[["blood pressure","артериальное давление"],["cuff","манжета"],["stethoscope","стетоскоп"],["systolic pressure","систолическое давление"],["diastolic pressure","диастолическое давление"],["pulse","пульс"],["measurement","измерение"],["patient","пациент"]],
+2:[["nebulizer","небулайзер"],["inhalation","ингаляция"],["mask","маска"],["mouthpiece","мундштук"],["solution","раствор"],["airway","дыхательные пути"],["breathing","дыхание"],["treatment","лечение"]],
+3:[["meningeal signs","менингеальные симптомы"],["neck stiffness","ригидность затылочных мышц"],["neurological examination","неврологическое обследование"],["symptom","симптом"],["assessment","оценка"],["pain","боль"],["clinical examination","клиническое обследование"],["patient","пациент"]],
+4:[["lung auscultation","аускультация лёгких"],["breath sounds","дыхательные шумы"],["wheeze","хрип"],["crackles","крепитация"],["stethoscope","стетоскоп"],["chest","грудная клетка"],["breathing","дыхание"],["lung","лёгкое"]],
+5:[["percussion","перкуссия"],["resonant sound","ясный лёгочный звук"],["chest","грудная клетка"],["symmetrical areas","симметричные участки"],["lung tissue","лёгочная ткань"],["sound","звук"],["comparison","сравнение"],["examination","обследование"]],
+6:[["heart auscultation","аускультация сердца"],["heart sounds","тоны сердца"],["murmur","шум"],["rhythm","ритм"],["heart rate","частота сердечных сокращений"],["stethoscope","стетоскоп"],["valve","клапан"],["cardiac cycle","сердечный цикл"]],
+7:[["heart borders","границы сердца"],["cardiac dullness","сердечная тупость"],["percussion","перкуссия"],["right border","правая граница"],["left border","левая граница"],["upper border","верхняя граница"],["heart","сердце"],["examination","обследование"]],
+8:[["electrocardiography","электрокардиография"],["electrode","электрод"],["ECG / EKG","ЭКГ"],["tracing","запись ЭКГ"],["artifact","артефакт"],["heart rhythm","сердечный ритм"],["recording","регистрация"],["patient position","положение пациента"]],
+9:[["lymph node","лимфатический узел"],["palpation","пальпация"],["tenderness","болезненность"],["swelling","увеличение/отёк"],["consistency","консистенция"],["mobility","подвижность"],["occipital","затылочный"],["submandibular","подчелюстной"]],
+10:[["fracture","перелом"],["splint","шина"],["immobilization","иммобилизация"],["forearm","предплечье"],["injury","травма"],["circulation","кровообращение"],["sensation","чувствительность"],["fixation","фиксация"]],
+11:[["CPR","сердечно-лёгочная реанимация"],["chest compression","компрессия грудной клетки"],["AED","автоматический наружный дефибриллятор"],["rescue breathing","искусственное дыхание"],["cardiac arrest","остановка кровообращения"],["emergency","неотложное состояние"],["defibrillator","дефибриллятор"],["resuscitation","реанимация"]]
+};
+function openVocabulary(){
+  if(!currentSkill)return;
+  show('vocabulary');
+  document.getElementById('vocabularyTitle').textContent='Лексический словарь: '+currentSkill.skill;
+  const items=vocabularyData[currentSkill.number]||[["skill","навык"],["procedure","процедура"],["patient","пациент"],["safety","безопасность"],["assessment","оценка"]];
+  document.getElementById('vocabularyContent').innerHTML=`<div class="card"><b>📚 English for Medical Students</b><p class="small">Медицинская лексика по выбранному практическому навыку.</p></div><div class="card">${items.map((x,i)=>`<div style="display:flex;gap:12px;padding:11px 0;border-bottom:1px solid #edf2ef"><span class="pill">${i+1}</span><div><b>${x[0]}</b><div class="small">${x[1]}</div></div></div>`).join('')}</div><button class="btn" onclick="openTheory()">← Вернуться к теории</button>`;
+}
+function renderTheory(){
+  if(!currentSkill) return;
+  document.getElementById('theoryTitle').textContent=currentSkill.skill;
+  const pack=(theoryData[currentSkill.code]&&theoryData[currentSkill.code][currentSkill.number])||genericTheory(currentSkill.skill);
+  const steps=pack.algorithm.map((x,i)=>`<div class="checkrow"><span class="pill">${i+1}</span><span>${x}</span></div>`).join('');
+  document.getElementById('theoryContent').innerHTML=
+    theoryCard("🎯 Цель навыка", `<p>${pack.purpose}</p>`) +
+    theoryCard("🧰 Оснащение", `<p>${pack.equipment}</p>`) +
+    theoryCard("👩‍⚕️ Подготовка пациента", `<p>${pack.preparation}</p>`) +
+    theoryCard("📋 Алгоритм выполнения", `<div>${steps}</div>`) +
+    theoryCard("🔎 Что оцениваем", `<p>${pack.findings}</p>`) +
+    theoryCard("⚠️ Типичные ошибки", `<p>${pack.errors}</p>`) +
+    theoryCard("📚 Лексика", `<p>${pack.vocab}</p>`);
+}
+
+function startQuiz(){cur=0;score=0;renderQ();show('quiz')}
+function renderQ(){answered=false;document.getElementById('qnum').textContent=`Вопрос ${cur+1} из ${qs.length}`;document.getElementById('qbar').style.width=((cur+1)/qs.length*100)+'%';document.getElementById('qtext').textContent=qs[cur][0];document.getElementById('feedback').innerHTML='';document.getElementById('next').disabled=true;document.getElementById('opts').innerHTML=qs[cur][1].map((o,i)=>`<div class="option" onclick="answer(${i})">${o}</div>`).join('')}
+function answer(i){if(answered)return;answered=true;if(i===qs[cur][2]){score++;document.getElementById('feedback').innerHTML='<div class="card">✅ Правильно!</div>'}else document.getElementById('feedback').innerHTML='<div class="card">❌ Неверно. Повторите материал.</div>';document.querySelectorAll('.option')[i].classList.add('sel');document.getElementById('next').disabled=false}
+function nextQ(){if(cur<qs.length-1){cur++;renderQ()}else{document.getElementById('score').textContent=Math.round(score/qs.length*100)+'%';document.getElementById('scoreText').textContent=`Правильных ответов: ${score} из ${qs.length}`;show('result')}}
+function startChecklist(){
+  if(!currentSkill)return;
+  show('checklist');
+  const pack=(theoryData[currentSkill.code]&&theoryData[currentSkill.code][currentSkill.number])||genericTheory(currentSkill.skill);
+  const steps=pack.algorithm||[];
+  const state=steps.map(()=>({done:false,self:false}));
+
+  function render(){
+    const done=state.filter(x=>x.done).length, checked=state.filter(x=>x.self).length, total=steps.length;
+    const pct=total?Math.round(done/total*100):0, spct=total?Math.round(checked/total*100):0;
+    document.getElementById('checklistTitle').textContent='Чек-лист: '+currentSkill.skill;
+    document.getElementById('checklistContent').innerHTML=`
+      <div class="card" style="border-left:5px solid #2e9b69"><b>📋 Строго по алгоритму</b>
+      <p class="small">Пункты выполняются последовательно. После каждого действия студент выполняет самопроверку.</p></div>
+      <div class="card"><b>Выполнение: ${pct}%</b><div style="height:9px;background:#e8f0ec;border-radius:9px;margin:8px 0 14px"><div style="height:100%;width:${pct}%;background:#2e9b69;border-radius:9px"></div></div>
+      <b>Самопроверка: ${spct}%</b><div style="height:9px;background:#e8f0ec;border-radius:9px;margin-top:8px"><div style="height:100%;width:${spct}%;background:#5b8def;border-radius:9px"></div></div></div>
+      ${steps.map((s,i)=>{
+        const unlocked=i===0||state[i-1].done;
+        return `<div class="card" style="margin-bottom:10px;opacity:${unlocked?1:.55};background:${state[i].done?'#eaf8f0':'#fff'}">
+          <div style="display:flex;gap:12px;align-items:flex-start"><span style="width:32px;height:32px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;background:${state[i].done?'#2e9b69':'#eef3f0'};color:${state[i].done?'#fff':'#315044'};font-weight:800">${state[i].done?'✓':i+1}</span>
+          <div style="flex:1"><b>Шаг ${i+1}</b><p class="small">${s}</p>
+          ${!unlocked?'<div class="small">🔒 Сначала выполните предыдущий пункт.</div>':
+            !state[i].done?`<button class="btn" onclick="window.medikaDoStep(${i})">✓ Я выполнил(а) пункт</button>`:
+            `<div style="padding:10px;border:1px solid #d7eadf;border-radius:10px;background:#fff"><b>🔎 Самопроверка</b><p class="small">Действие выполнено полностью, безопасно и в правильной последовательности?</p>
+            <button class="btn ${state[i].self?'secondary':''}" onclick="window.medikaSelfCheck(${i})">${state[i].self?'✓ Проверено':'Я проверил(а) себя'}</button></div>`}</div></div></div>`;
+      }).join('')}
+      <div class="card"><b>🏁 Завершение</b><p class="small">Все пункты и самопроверки должны быть выполнены.</p>
+      <button class="btn" onclick="window.medikaFinishStrict()">Завершить тренировку</button>
+      <button class="btn secondary" onclick="openTheory()">← Теория</button></div>`;
+  }
+  window.medikaDoStep=i=>{if(i===0||state[i-1].done){state[i].done=true;render();}};
+  window.medikaSelfCheck=i=>{if(state[i].done){state[i].self=true;render();}};
+  window.medikaFinishStrict=()=>{
+    const total=steps.length, done=state.filter(x=>x.done).length, checked=state.filter(x=>x.self).length;
+    if(done<total||checked<total){alert('Сначала выполните все пункты и самопроверку по каждому пункту.');return;}
+    document.getElementById('checklistContent').innerHTML=`<div class="card" style="text-align:center;padding:30px;border-top:6px solid #2e9b69"><div style="font-size:58px">🏆</div><h2>100%</h2><h3>Чек-лист выполнен</h3><p class="small">Все ${total} действий выполнены и проверены студентом.</p></div>
+    <div class="card"><b>🎓 Результат самопроверки</b><p class="small">Это учебная оценка. Практическая отработка выполняется на симуляционном оборудовании под контролем преподавателя с учётом актуального официального чек-листа.</p></div>
+    <button class="btn" onclick="startChecklist()">Пройти ещё раз</button><button class="btn secondary" onclick="openTheory()">Открыть теорию</button>`;
+  };
+  render();
+}
+function finishCheck(){alert('Тренировка завершена. Результат отмечен как учебный. Для аккредитации сверяйте действия с актуальным чек-листом ФМЗА.');show('skill')}
+function checkFMZA(){window.open(fmzaUrls[currentSpec.code]||currentSpec.url,'_blank')}
+function openCurrentFMZA(){window.open(currentSpec.url,'_blank')}
+init();
+
+function shareMedika(){
+  const url="https://viktoriiaai25.github.io/MEDIKA/";
+  const title="МЕДИКА — цифровой тренажёр";
+  const text="Откройте «МЕДИКА» — цифровой тренажёр практических медицинских навыков.";
+  if(navigator.share){
+    navigator.share({title:title,text:text,url:url}).catch(()=>{});
+  }else if(navigator.clipboard){
+    navigator.clipboard.writeText(url).then(()=>alert("Ссылка на «МЕДИКА» скопирована!"));
+  }else{
+    prompt("Скопируйте ссылку на «МЕДИКА»:",url);
+  }
+}
+</script><section id="vocabulary" class="screen"><button class="back" onclick="show('skill')">← Навык</button><h1>Лексический словарь</h1><div class="hero"><h2 id="vocabularyTitle"></h2><p class="sub">English vocabulary • медицинская лексика</p></div><div id="vocabularyContent"></div></section></body></html>
